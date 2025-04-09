@@ -129,7 +129,9 @@ public class AdjacencyListUndirectedGraph {
      */
     public void removeEdge(UndirectedNode x, UndirectedNode y) {
     	if(isEdge(x,y)){
-    		// A completer
+            Edge e = new Edge(x,y);
+            this.edges.remove(e);
+            this.nbEdges--;
     	}
     }
 
