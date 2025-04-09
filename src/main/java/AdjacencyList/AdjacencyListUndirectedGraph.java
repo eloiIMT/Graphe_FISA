@@ -140,7 +140,13 @@ public class AdjacencyListUndirectedGraph {
      */
     public void addEdge(UndirectedNode x, UndirectedNode y) {
     	if(!isEdge(x,y)){
-    		// A completer
+            if(!isEdge(x,y)){
+                Edge e = new Edge(x,y);
+                this.edges.add(e);
+                this.getNodeOfList(x).addEdge(e);
+                this.getNodeOfList(y).addEdge(e);
+                this.nbEdges++;
+            }
     	}
     }
 
