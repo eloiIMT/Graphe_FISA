@@ -1,6 +1,7 @@
 package AdjacencyList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import GraphAlgorithms.GraphTools;
@@ -120,8 +121,7 @@ public class AdjacencyListUndirectedGraph {
      * @return true if there is an edge between x and y
      */
     public boolean isEdge(UndirectedNode x, UndirectedNode y) {      	
-        // A completer
-    	return true;
+        return this.edges.contains(new Edge(x,y)) || this.edges.contains(new Edge(y,x));
     }
 
     /**
@@ -131,6 +131,8 @@ public class AdjacencyListUndirectedGraph {
     	if(isEdge(x,y)){
             Edge e = new Edge(x,y);
             this.edges.remove(e);
+            this.getNodeOfList(x).getIncidentEdges().remove(e);
+            this.getNodeOfList(y).getIncidentEdges().remove(e);
             this.nbEdges--;
     	}
     }
@@ -170,7 +172,15 @@ public class AdjacencyListUndirectedGraph {
      */
     public int[][] toAdjacencyMatrix() {
         int[][] matrix = new int[nbNodes][nbNodes];
-        // A completer
+        for (int node = 0; node < nbNodes; node++) {
+            for (int neighbour = 0; neighbour < nbNodes; neighbour++) {
+                if (isEdge(this.nodes.get(node), this.nodes.get(neighbour))) {
+                    matrix[node][neighbour] = 1;
+                } else {
+                    matrix[node][neighbour] = 0;
+                }
+            }
+        }
         return matrix;
     }
 
@@ -200,9 +210,11 @@ public class AdjacencyListUndirectedGraph {
         AdjacencyListUndirectedGraph al = new AdjacencyListUndirectedGraph(mat);
         System.out.println(al);        
         System.out.println("(n_2,n_5) is it in the graph ? " +  al.isEdge(al.getNodes().get(2), al.getNodes().get(5)));
-        
-        
-        // A completer
+        System.out.println("Removing edge (n_2,n_5)");
+        al.addEdge(al.getNodes().get(2), al.getNodes().get(5));
+        System.out.println("(n_2,n_5) is it in the graph ? " +  al.isEdge(al.getNodes().get(2), al.getNodes().get(5)));
+        System.out.println(al);
+        System.out.println(Arrays.deepToString(al.toAdjacencyMatrix()));
     }
 
 }
