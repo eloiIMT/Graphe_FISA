@@ -196,7 +196,7 @@ public class GraphTools {
 	public static void afficherMatrix(int[][] m){
 		for(int[] line : m){
 			for(int v : line){
-				System.out.print(v+" ");
+				System.out.print("\t" + v);
 			}
 			System.out.println();
 		}

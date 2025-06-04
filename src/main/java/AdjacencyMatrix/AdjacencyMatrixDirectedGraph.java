@@ -117,31 +117,45 @@ public class AdjacencyMatrixDirectedGraph {
 	 * @return true if the arc (from,to) exists in the graph.
  	 */
 	public boolean isArc(int from, int to) {
-		return this.matrix[from][to] == 1;
+		return matrix[from][to] == 1;
 	}
 
 	/**
 	 * removes the arc (from,to) if there exists one between these nodes in the graph.
 	 */
 	public void removeArc(int from, int to) {
-		this.matrix[from][to] = 0;
-		this.nbArcs--;
+		if (isArc(from, to)){
+			matrix[from][to] = 0;
+			nbArcs -= 1;
+		}
 	}
 
 	/**
 	 * Adds the arc (from,to). 
 	 */
 	public void addArc(int from, int to) {
-		this.matrix[from][to] = 1;
-		this.nbArcs++;
+		if (!isArc(from, to)){
+			matrix[from][to] = 1;
+			nbArcs += 1;
+		}
 	}
 
 	/**
 	 * @return a new graph which is the inverse graph of this.matrix
  	 */
 	public AdjacencyMatrixDirectedGraph computeInverse() {
-		AdjacencyMatrixDirectedGraph amInv = new AdjacencyMatrixDirectedGraph(this.matrix);	
-		// A completer
+		AdjacencyMatrixDirectedGraph amInv = new AdjacencyMatrixDirectedGraph(this.matrix);
+
+		for (int i =0; i < amInv.getNbNodes(); i++) {
+			for (int j =0; j < amInv.getNbNodes(); j++) {
+				if (isArc(i,j)) {
+					amInv.removeArc(i,j);
+				} else {
+					amInv.addArc(i,j);
+				}
+			}
+		}
+
 		return amInv;
 	}
 
@@ -177,5 +191,61 @@ public class AdjacencyMatrixDirectedGraph {
 		for (Integer integer : t2) {
 			System.out.print(integer + ", ");
 		}
+
+		System.out.println("\n\nTesting isArc method:");
+		testIsArc(am, 1, 2); // should be YES
+		testIsArc(am, 0, 2); // should be NO
+
+		System.out.println("\nTesting addArc method:");
+		testAddArc(am, 0, 2); // should add arc
+		testAddArc(am, 1, 2); // should arc already exists
+
+		System.out.println("\nTesting removeArc method:");
+		testRemoveArc(am, 0, 1); // should arc already not be here
+		testRemoveArc(am, 0, 2); // should remove arc
+	}
+
+	private static void testIsArc(AdjacencyMatrixDirectedGraph am, int i, int j) {
+		System.out.println("== Test isArc(" + i + ", " + j + ") ==");
+		System.out.println("\tisArc(" + i + "," + j + ") : " + (am.isArc(i, j) ? "YES" : "NO") +
+				" | " + am.getMatrix()[i][j] + " : value");
+	}
+
+	private static void testAddArc(AdjacencyMatrixDirectedGraph am, int i, int j) {
+		System.out.println("=== Test addArc(" + i + ", " + j + ") ===");
+
+		// Save before state
+		int beforeIJ = am.getMatrix()[i][j];
+
+		am.addArc(i, j);
+
+		// Save after state
+		int afterIJ = am.getMatrix()[i][j];
+
+		// Check if the edge was added correctly
+		boolean ok = am.isArc(i, j);
+
+		System.out.println("\t[Before] matrix[" + i + "][" + j + "] = " + beforeIJ);
+		System.out.println("\t[After ] matrix[" + i + "][" + j + "] = " + afterIJ);
+		System.out.println("\tResult: " + (ok ? "OK" : "KO"));
+	}
+
+	private static void testRemoveArc(AdjacencyMatrixDirectedGraph am, int i, int j) {
+		System.out.println("=== Test removeArc(" + i + ", " + j + ") ===");
+
+		// Save before state
+		int beforeIJ = am.getMatrix()[i][j];
+
+		am.removeArc(i, j);
+
+		// Save after state
+		int afterIJ = am.getMatrix()[i][j];
+
+		// Check if the edge was removed correctly
+		boolean ok = !am.isArc(i, j);
+
+		System.out.println("\t[Before] matrix[" + i + "][" + j + "] = " + beforeIJ);
+		System.out.println("\t[After ] matrix[" + i + "][" + j + "] = " + afterIJ);
+		System.out.println("\tResult: " + (ok ? "OK" : "KO"));
 	}
 }

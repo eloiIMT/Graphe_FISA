@@ -1,9 +1,9 @@
 package AdjacencyList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import AdjacencyMatrix.AdjacencyMatrixUndirectedGraph;
 import GraphAlgorithms.GraphTools;
 import Nodes_Edges.Edge;
 import Nodes_Edges.UndirectedNode;
@@ -120,8 +120,20 @@ public class AdjacencyListUndirectedGraph {
     /**
      * @return true if there is an edge between x and y
      */
-    public boolean isEdge(UndirectedNode x, UndirectedNode y) {      	
-        return this.edges.contains(new Edge(x,y)) || this.edges.contains(new Edge(y,x));
+    public boolean isEdge(UndirectedNode x, UndirectedNode y) {
+        for (Edge edge: this.getEdges()) {
+            if (edge.getFirstNode().equals(x)){
+                if (edge.getSecondNode().equals(y)){
+                    return true;
+                }
+            }
+            if (edge.getFirstNode().equals(y)){
+                if (edge.getSecondNode().equals(x)){
+                    return true;
+                }
+            }
+        }
+    	return false;
     }
 
     /**
@@ -129,11 +141,19 @@ public class AdjacencyListUndirectedGraph {
      */
     public void removeEdge(UndirectedNode x, UndirectedNode y) {
     	if(isEdge(x,y)){
-            Edge e = new Edge(x,y);
-            this.edges.remove(e);
-            this.getNodeOfList(x).getIncidentEdges().remove(e);
-            this.getNodeOfList(y).getIncidentEdges().remove(e);
-            this.nbEdges--;
+            Edge edgeXY = new Edge(x, y);
+            Edge edgeYX = new Edge(y, x);
+            edges.remove(edgeXY);
+
+            for (UndirectedNode node: this.getNodes()) {
+                if (node.equals(x)) {
+                    node.getIncidentEdges().removeIf(obj -> obj.equals(edgeXY));
+                } else if (node.equals(y)) {
+                    node.getIncidentEdges().removeIf(obj -> obj.equals(edgeYX));
+                }
+            }
+
+            nbEdges -= 1;
     	}
     }
 
@@ -144,13 +164,19 @@ public class AdjacencyListUndirectedGraph {
      */
     public void addEdge(UndirectedNode x, UndirectedNode y) {
     	if(!isEdge(x,y)){
-            if(!isEdge(x,y)){
-                Edge e = new Edge(x,y);
-                this.edges.add(e);
-                this.getNodeOfList(x).addEdge(e);
-                this.getNodeOfList(y).addEdge(e);
-                this.nbEdges++;
+            Edge edgeXY = new Edge(x, y);
+            Edge edgeYX = new Edge(y, x);
+            edges.add(edgeXY);
+
+            for (UndirectedNode node: this.getNodes()) {
+                if (node.equals(x)) {
+                    node.getIncidentEdges().add(edgeXY);
+                } else if (node.equals(y)) {
+                    node.getIncidentEdges().add(edgeYX);
+                }
             }
+
+            nbEdges += 1;
     	}
     }
 
@@ -172,14 +198,11 @@ public class AdjacencyListUndirectedGraph {
      */
     public int[][] toAdjacencyMatrix() {
         int[][] matrix = new int[nbNodes][nbNodes];
-        for (int node = 0; node < nbNodes; node++) {
-            for (int neighbour = 0; neighbour < nbNodes; neighbour++) {
-                if (isEdge(this.nodes.get(node), this.nodes.get(neighbour))) {
-                    matrix[node][neighbour] = 1;
-                } else {
-                    matrix[node][neighbour] = 0;
-                }
-            }
+        for (Edge edge : edges) {
+            int i = edge.getFirstNode().getLabel();
+            int j = edge.getSecondNode().getLabel();
+            matrix[i][j] = 1;
+            matrix[j][i] = 1;
         }
         return matrix;
     }
@@ -210,11 +233,120 @@ public class AdjacencyListUndirectedGraph {
         AdjacencyListUndirectedGraph al = new AdjacencyListUndirectedGraph(mat);
         System.out.println(al);        
         System.out.println("(n_2,n_5) is it in the graph ? " +  al.isEdge(al.getNodes().get(2), al.getNodes().get(5)));
-        System.out.println("Removing edge (n_2,n_5)");
-        al.addEdge(al.getNodes().get(2), al.getNodes().get(5));
-        System.out.println("(n_2,n_5) is it in the graph ? " +  al.isEdge(al.getNodes().get(2), al.getNodes().get(5)));
-        System.out.println(al);
-        System.out.println(Arrays.deepToString(al.toAdjacencyMatrix()));
+
+        AdjacencyListUndirectedGraph adjacencyList = new AdjacencyListUndirectedGraph(new int[][]{
+            {0, 1, 0},
+            {1, 0, 1},
+            {0, 1, 0}
+        });
+
+        System.out.println("Testing isEdge method:");
+        testIsEdge(adjacencyList, adjacencyList.getNodes().get(0), adjacencyList.getNodes().get(1), true);
+        testIsEdge(adjacencyList, adjacencyList.getNodes().get(0), adjacencyList.getNodes().get(2), false);
+
+        System.out.println("\nTesting addEdge method:");
+        testAddEdge(adjacencyList, adjacencyList.getNodes().get(0), adjacencyList.getNodes().get(2), true);
+        testAddEdge(adjacencyList, adjacencyList.getNodes().get(1), adjacencyList.getNodes().get(2), false);
+
+        System.out.println("\nTesting removeEdge method:");
+        testRemoveEdge(adjacencyList, adjacencyList.getNodes().get(0), adjacencyList.getNodes().get(2), false);
+        testRemoveEdge(adjacencyList, adjacencyList.getNodes().get(1), adjacencyList.getNodes().get(2), true);
+
+        System.out.println("\nTesting toAdjacencyMatrix method:");
+        testToAdjacencyMatrix(adjacencyList, new int[][]{
+                {0, 1, 0},
+                {1, 0, 1},
+                {0, 1, 0}
+        });
+        adjacencyList = new AdjacencyListUndirectedGraph(new int[][]{
+                {0, 0, 0},
+                {0, 0, 0},
+                {0, 0, 0}
+        });
+        testToAdjacencyMatrix(adjacencyList, new int[][]{
+                {0, 0, 0},
+                {0, 0, 0},
+                {0, 0, 0}
+        });
     }
 
+    private static void testIsEdge(AdjacencyListUndirectedGraph al, UndirectedNode x, UndirectedNode y, boolean expected) {
+        AdjacencyListUndirectedGraph adjacencyList = new AdjacencyListUndirectedGraph(al);
+        System.out.println("== Test isEdge(" + x + ", " + y + ") ==");
+        System.out.println("\tisEdge(" + x + "," + y + ") : " + (adjacencyList.isEdge(x, y) == expected ? "OK" : "KO") +
+                " | " + adjacencyList.getEdges() + " : value");
+    }
+
+    private static void testAddEdge(AdjacencyListUndirectedGraph al, UndirectedNode x, UndirectedNode y, boolean expectedAdd) {
+        AdjacencyListUndirectedGraph adjacencyList = new AdjacencyListUndirectedGraph(al);
+        System.out.println("=== Test addEdge(" + x + ", " + y + ") ===");
+
+        // Save before state
+        int nbEdgeBefore = adjacencyList.getNbEdges();
+        System.out.println("\t[Before] all edges of the graph: " + adjacencyList.getEdges());
+
+        adjacencyList.addEdge(x, y);
+
+        // Check if the edge was added correctly
+        boolean ok = false;
+        if (expectedAdd){
+            ok = adjacencyList.isEdge(x, y) && adjacencyList.isEdge(y, x) && (nbEdgeBefore + 1 == adjacencyList.getNbEdges());
+        } else {
+            ok = adjacencyList.isEdge(x, y) && adjacencyList.isEdge(y, x) && (nbEdgeBefore == adjacencyList.getNbEdges());
+        }
+
+        System.out.println("\t[After] all edges of the graph: " + adjacencyList.getEdges());
+        System.out.println("\tResult: " + (ok ? "OK" : "KO"));
+    }
+
+    private static void testRemoveEdge(AdjacencyListUndirectedGraph al, UndirectedNode x, UndirectedNode y, boolean expectedRemove) {
+        AdjacencyListUndirectedGraph adjacencyList = new AdjacencyListUndirectedGraph(al);
+        System.out.println("=== Test removeEdge(" + x + ", " + y + ") ===");
+
+        // Save before state
+        int nbEdgeBefore = adjacencyList.getNbEdges();
+        System.out.println("\t[Before] all edges of the graph: " + adjacencyList.getEdges());
+
+        adjacencyList.removeEdge(x, y);
+
+        // Check if the edge was removed correctly
+        boolean ok = false;
+        if (expectedRemove){
+            ok = !adjacencyList.isEdge(x, y) && !adjacencyList.isEdge(y, x) && (nbEdgeBefore - 1 == adjacencyList.getNbEdges());
+        } else {
+            ok = !adjacencyList.isEdge(x, y) && !adjacencyList.isEdge(y, x) && (nbEdgeBefore == adjacencyList.getNbEdges());
+        }
+        System.out.println("\t[After] all edges of the graph: " + adjacencyList.getEdges());
+        System.out.println("\tResult: " + (ok ? "OK" : "KO"));
+    }
+
+    private static void testToAdjacencyMatrix(AdjacencyListUndirectedGraph al, int[][] expectedMatrix) {
+        AdjacencyListUndirectedGraph adjacencyList = new AdjacencyListUndirectedGraph(al);
+        System.out.println("=== Test toAdjacencyMatrix ===");
+
+        int[][] matrix = adjacencyList.toAdjacencyMatrix();
+
+        System.out.println("\tEdge: " + adjacencyList.getEdges());
+        System.out.println("\tAdjacency Matrix: ");
+        GraphTools.afficherMatrix(matrix);
+
+        boolean ok = true;
+        if (matrix.length != expectedMatrix.length) {
+            ok = false;
+        } else {
+            for (int i = 0; i < matrix.length; i++) {
+                if (matrix[i].length != expectedMatrix[i].length) {
+                    ok = false;
+                    break;
+                }
+                for (int j = 0; j < matrix[i].length; j++) {
+                    if (matrix[i][j] != expectedMatrix[i][j]) {
+                        ok = false;
+                        break;
+                    }
+                }
+            }
+        }
+        System.out.println("\tResult: " + (ok ? "OK" : "KO"));
+    }
 }

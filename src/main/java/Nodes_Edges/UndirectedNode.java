@@ -68,6 +68,4 @@ public class UndirectedNode extends AbstractNode {
 			this.getIncidentEdges().get(indexEdge).setWeight(e1.getWeight());
 		}
 	}
-
-	
 }

@@ -13,24 +13,12 @@
 	
     <dependencies>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
 		<sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
-        <testResources><testResource><directory>../../src/test/resources</directory></testResource></testResources>
+        <testResources><testResource><directory>src/test/resources</directory></testResource></testResources>
 		
         <plugins>
             <plugin>
