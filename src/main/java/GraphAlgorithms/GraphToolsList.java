@@ -1,16 +1,10 @@
 package GraphAlgorithms;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import AdjacencyList.AdjacencyListDirectedGraph;
-import AdjacencyList.AdjacencyListDirectedValuedGraph;
-import AdjacencyList.AdjacencyListUndirectedValuedGraph;
-import Collection.Triple;
 import Nodes_Edges.Arc;
 import Nodes_Edges.DirectedNode;
-import Nodes_Edges.UndirectedNode;
 
 public class GraphToolsList  extends GraphTools {
 
@@ -40,15 +34,16 @@ public class GraphToolsList  extends GraphTools {
 	// 				Methods
 	// ------------------------------------------
 
-	public void BFS(AdjacencyListDirectedGraph g) {
+	public List<DirectedNode> BFS(AdjacencyListDirectedGraph g) {
 		HashMap<DirectedNode,Boolean> visitees = new HashMap<DirectedNode,Boolean>();
 		DirectedNode s = g.getNodes().get(0);
+		List<DirectedNode> result = new ArrayList<DirectedNode>();
 		visitees.put(s,true);
 		Queue<DirectedNode> fifo = new LinkedList<DirectedNode>();
 		fifo.add(s);
 		while (!fifo.isEmpty()){
 			DirectedNode v = fifo.poll();
-			System.out.println("Noeud visité: " + v);
+			result.add(v);
 			for (Arc a : v.getArcSucc()) {
 				DirectedNode w = a.getSecondNode();
 				if (!visitees.containsKey(w)) {
@@ -57,6 +52,30 @@ public class GraphToolsList  extends GraphTools {
 				}
 			}
 		}
+		return result;
+	}
+
+	private void explorerSommet(DirectedNode s, List<DirectedNode> visitees) {
+		visitees.add(s);
+		for (Arc a : s.getArcSucc()) {
+			DirectedNode voisin = a.getSecondNode();
+			if (!visitees.contains(voisin)) {
+				explorerSommet(voisin, visitees);
+			}
+		}
+	}
+
+	private List<DirectedNode> explorerGraphe(AdjacencyListDirectedGraph g) {
+		List<DirectedNode> visitees = new ArrayList<DirectedNode>();
+		DirectedNode s = g.getNodes().get(0);
+		visitees.add(s);
+		for (Arc a : s.getArcSucc()) {
+			DirectedNode voisin = a.getSecondNode();
+			if (!visitees.contains(voisin)) {
+				explorerSommet(voisin, visitees);
+			}
+		}
+		return visitees;
 	}
 
 
@@ -68,6 +87,15 @@ public class GraphToolsList  extends GraphTools {
 
 		GraphToolsList gtl = new GraphToolsList();
 		System.out.println("BFS on the graph: ");
-		gtl.BFS(al);
+		for (DirectedNode n : gtl.BFS(al)) {
+			System.out.print(n+" ");
+		}
+		System.out.println("\nExpected: n_0 n_4 n_2 n_6 n_9 n_5 n_3 n_8 n_1");
+
+		System.out.println("\nDFS on the graph: ");
+		for (DirectedNode n : gtl.explorerGraphe(al)) {
+			System.out.print(n+" ");
+		}
+		System.out.println("\nExpected: n_0 n_4 n_2 n_6 n_9 n_5 n_3 n_8 n_1");
 	}
 }
