@@ -44,7 +44,23 @@ public class AdjacencyListDirectedValuedGraph extends AdjacencyListDirectedGraph
      * And adds this arc to the incident list of both extremities (nodes) and into the global list "arcs" of the graph.
      */
     public void addArc(DirectedNode from, DirectedNode to, int cost) {
-    	// A completer      
+        if (!isArc(from, to)) {
+            Arc arc = new Arc(from, to, cost);
+            arcs.add(arc);
+            from.addArc(arc);
+            to.addArc(arc);
+            nbArcs++;
+        } else {
+            // Si l'arc existe déjà, on met à jour le poids
+            for (Arc arc : arcs) {
+                if (arc.getFirstNode().equals(from) && arc.getSecondNode().equals(to)) {
+                    arc.setWeight(cost);
+                    break;
+                }
+            }
+            from.addArc(new Arc(from, to, cost));
+            to.addArc(new Arc(from, to, cost));
+        }
     }
     
     
@@ -54,8 +70,15 @@ public class AdjacencyListDirectedValuedGraph extends AdjacencyListDirectedGraph
         int[][] matrixValued = GraphTools.generateValuedGraphData(10, false, false, true, false, 100001);
         GraphTools.afficherMatrix(matrixValued);
         AdjacencyListDirectedValuedGraph al = new AdjacencyListDirectedValuedGraph(matrixValued);
-        System.out.println(al);        
-        // A completer
+        System.out.println(al);
+
+        System.out.println("--------------------");
+        al.addArc(al.nodes.get(0), al.nodes.get(2), 2);
+        System.out.println("Après ajout arc (0,2,2):\n" + al);
+        System.out.println("--------------------");
+        al.addArc(al.nodes.get(0), al.nodes.get(2), 99);
+        System.out.println("Après modification coût arc (0,2,99):\n" + al);
+        System.out.println("--------------------");
     }
 	
 }

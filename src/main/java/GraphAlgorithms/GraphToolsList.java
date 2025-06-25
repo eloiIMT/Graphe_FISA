@@ -138,6 +138,54 @@ public class GraphToolsList  extends GraphTools {
 		return explorerGrapheBis(gInverse, ordreInverse);
 	}
 
+	// Question 2: getBestChildPos
+	private int getBestChildPos(int[] nodes, int src, int size) {
+	    int left = 2 * src + 1;
+	    int right = 2 * src + 2;
+	    if (left >= size) return -1; // no children
+	    if (right >= size) return left; // only left child
+	    return (nodes[left] < nodes[right]) ? left : right;
+	}
+
+	// Question 3: insert
+	public boolean insert(int[] nodes, int value, int size) {
+	    if (size >= nodes.length) return false;
+	    nodes[size] = value;
+	    int i = size;
+	    while (i > 0) {
+	        int parent = (i - 1) / 2;
+	        if (nodes[i] < nodes[parent]) {
+	            int tmp = nodes[i];
+	            nodes[i] = nodes[parent];
+	            nodes[parent] = tmp;
+	            i = parent;
+	        } else {
+	            break;
+	        }
+	    }
+	    return true;
+	}
+
+	// Question 6: remove
+	public int remove(int[] nodes, int size) {
+	    if (size == 0) return -1;
+	    int removed = nodes[0];
+	    nodes[0] = nodes[size - 1];
+	    int i = 0;
+	    while (true) {
+	        int best = getBestChildPos(nodes, i, size - 1);
+	        if (best == -1) break;
+	        if (nodes[i] > nodes[best]) {
+	            int tmp = nodes[i];
+	            nodes[i] = nodes[best];
+	            nodes[best] = tmp;
+	            i = best;
+	        } else {
+	            break;
+	        }
+	    }
+	    return removed;
+	}
 
 	public static void main(String[] args) {
 		int[][] Matrix = GraphTools.generateGraphData(10, 20, false, false, true, 100001);
