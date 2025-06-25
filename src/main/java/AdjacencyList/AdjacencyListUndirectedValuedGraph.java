@@ -43,7 +43,23 @@ public class AdjacencyListUndirectedValuedGraph extends AdjacencyListUndirectedG
      * And adds this edge to the incident list of both extremities (nodes) and into the global list "edges" of the graph.
      */
     public void addEdge(UndirectedNode x, UndirectedNode y, int cost) {
-    	// A completer
+        Edge edge = new Edge(x, y, cost);
+        if (!this.edges.contains(edge)) {
+            this.edges.add(edge);
+            x.addEdge(edge);
+            y.addEdge(new Edge(y, x, cost));
+            this.nbEdges++;
+        } else {
+            // Si l'arête existe déjà, on met à jour le poids
+            for (Edge e : edges) {
+                if ((e.getFirstNode().equals(x) && e.getSecondNode().equals(y)) ||
+                    (e.getFirstNode().equals(y) && e.getSecondNode().equals(x))) {
+                    e.setWeight(cost);
+                }
+            }
+            x.addEdge(new Edge(x, y, cost));
+            y.addEdge(new Edge(y, x, cost));
+        }
     }
     
     
@@ -54,6 +70,13 @@ public class AdjacencyListUndirectedValuedGraph extends AdjacencyListUndirectedG
         AdjacencyListUndirectedValuedGraph al = new AdjacencyListUndirectedValuedGraph(matrixValued);
         System.out.println(al);
         System.out.println("Does edge (n_5,n_6) exist ? "+ al.getEdges().contains(new Edge(al.getNodes().get(6),al.getNodes().get(5))));
-        // A completer
+        System.out.println("--------------------");
+        al.addEdge(al.getNodes().get(1), al.getNodes().get(3), 7);
+        System.out.println("Après ajout arête (1,3,7):\n" + al);
+        System.out.println("--------------------");
+        al.addEdge(al.getNodes().get(1), al.getNodes().get(3), 42);
+        System.out.println("Après modification coût arête (1,3,42):\n" + al);
+        System.out.println("--------------------");
+        System.out.println("Existence arête (1,3): " + al.getEdges().contains(new Edge(al.getNodes().get(1), al.getNodes().get(3))));
     }
 }

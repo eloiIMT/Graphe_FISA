@@ -29,8 +29,8 @@ public class AdjacencyMatrixDirectedValuedGraph extends AdjacencyMatrixDirectedG
      * adds the arc (from,to,cost). If there is already one initial cost, we replace it.
      */	
 	public void addArc(int from, int to, int cost ) {
-		// A completer
-	}
+        this.matrix[from][to] = cost;
+    }
 
 	
 	
@@ -49,8 +49,24 @@ public class AdjacencyMatrixDirectedValuedGraph extends AdjacencyMatrixDirectedG
 
 	public static void main(String[] args) {
         int[][] matrixValued = GraphTools.generateValuedGraphData(10, false, false, true, false, 100001);
-		AdjacencyMatrixDirectedValuedGraph am = new AdjacencyMatrixDirectedValuedGraph(matrixValued);
-		System.out.println(am);
-		// A completer
-	}
+        AdjacencyMatrixDirectedValuedGraph am = new AdjacencyMatrixDirectedValuedGraph(matrixValued);
+        System.out.println(am);
+        System.out.println("--------------------");
+        am.addArc(0, 2, 5);
+        System.out.println("Après ajout arc (0,2,5):\n" + am);
+        if (am.matrix[0][2] == 5) {
+            System.out.println("Test ajout arc (0,2,5): OK");
+        } else {
+            System.out.println("Test ajout arc (0,2,5): ERREUR");
+        }
+        System.out.println("--------------------");
+        am.addArc(0, 2, 77);
+        System.out.println("Après modification coût arc (0,2,77):\n" + am);
+        if (am.matrix[0][2] == 77) {
+            System.out.println("Test modification coût arc (0,2,77): OK");
+        } else {
+            System.out.println("Test modification coût arc (0,2,77): ERREUR");
+        }
+        System.out.println("--------------------");
+    }
 }
