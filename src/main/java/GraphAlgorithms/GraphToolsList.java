@@ -65,7 +65,7 @@ public class GraphToolsList  extends GraphTools {
 		visitees.add(s);
 		for (Arc a : s.getArcSucc()) {
 			DirectedNode voisin = a.getSecondNode();
-			if (!visitees.contains(voisin)) {
+			if (visite[voisin.getLabel()] == NON_VISITE) {
 				explorerSommet(voisin, visitees);
 			}
 		}
@@ -75,32 +75,26 @@ public class GraphToolsList  extends GraphTools {
 
 	private List<DirectedNode> explorerGraphe(AdjacencyListDirectedGraph g) {
 		int taille = g.getNodes().size();
+		cpt = 0;
 		visite = new int[taille];
 		debut = new int[taille];
 		fin = new int[taille];
 		List<DirectedNode> visitees = new ArrayList<DirectedNode>();
-		DirectedNode s = g.getNodes().get(0);
-		visitees.add(s);
-		visite[s.getLabel()] = EN_COURS;
-		cpt++;
-		for (Arc a : s.getArcSucc()) {
-			DirectedNode voisin = a.getSecondNode();
-			if (!visitees.contains(voisin)) {
-				explorerSommet(voisin, visitees);
+		for (DirectedNode s : g.getNodes()) {
+			if (visite[s.getLabel()] == NON_VISITE) {
+				explorerSommet(s, visitees);
 			}
 		}
-		visite[s.getLabel()] = TOTALEMENT_VISITE;
-		fin[s.getLabel()] = cpt++;
 		return visitees;
 	}
 
-	private void explorerSommetBis(DirectedNode s, List<DirectedNode> visitees) {
+	private void explorerSommetBis(DirectedNode s, List<DirectedNode> composante) {
 		visite[s.getLabel()] = EN_COURS;
-		visitees.add(s);
+		composante.add(s);
 		for (Arc a : s.getArcSucc()) {
 			DirectedNode voisin = a.getSecondNode();
-			if (!visitees.contains(voisin)) {
-				explorerSommetBis(voisin, visitees);
+			if (visite[voisin.getLabel()] == NON_VISITE) {
+				explorerSommetBis(voisin, composante);
 			}
 		}
 		visite[s.getLabel()] = TOTALEMENT_VISITE;
@@ -114,19 +108,35 @@ public class GraphToolsList  extends GraphTools {
 		return nodes;
 	}
 
-	private List<DirectedNode> explorerGrapheBis(AdjacencyListDirectedGraph graphe) {
-		List<DirectedNode> visitees = new ArrayList<DirectedNode>();
-		AdjacencyListDirectedGraph g = graphe.computeInverse();
-		List<DirectedNode> sommets = sommetsParFinDecroissante(graphe);
-		for (DirectedNode voisin : sommets) {
-			if (visite[voisin.getLabel()] == NON_VISITE) {
-				explorerSommet(voisin, visitees);
+	private List<List<DirectedNode>> explorerGrapheBis(AdjacencyListDirectedGraph gInverse, List<DirectedNode> ordre) {
+		List<List<DirectedNode>> cfc = new ArrayList<>();
+		Arrays.fill(visite, NON_VISITE);
+		for (DirectedNode s : ordre) {
+			if (visite[s.getLabel()] == NON_VISITE) {
+				List<DirectedNode> composante = new ArrayList<>();
+				explorerSommetBis(s, composante);
+				cfc.add(composante);
 			}
 		}
-		return visitees;
+		return cfc;
 	}
 
+	public List<List<DirectedNode>> getComposantesFortementConnexes(AdjacencyListDirectedGraph g) {
+		List<DirectedNode> ordre = sommetsParFinDecroissante(g);
 
+		AdjacencyListDirectedGraph gInverse = g.computeInverse();
+
+		int taille = g.getNodes().size();
+		visite = new int[taille];
+		Arrays.fill(visite, NON_VISITE);
+
+		List<List<DirectedNode>> cfc = new ArrayList<>();
+
+		List<DirectedNode> ordreInverse = new ArrayList<>(ordre);
+		Collections.reverse(ordreInverse);
+
+		return explorerGrapheBis(gInverse, ordreInverse);
+	}
 
 
 	public static void main(String[] args) {
@@ -158,5 +168,11 @@ public class GraphToolsList  extends GraphTools {
 		for (int s : fin) {
 			System.out.print(s+" ");
 		}
+
+		System.out.println("\nComposantes fortement connexes :");
+		for (List<DirectedNode> comp : gtl.getComposantesFortementConnexes(al)) {
+			System.out.println(comp);
+		}
+		System.out.println("\nExpected: [n_2], [n_7], [n_1, n_0, n_4, n_6, n_9, n_5, n_3, n_8]");
 	}
 }
