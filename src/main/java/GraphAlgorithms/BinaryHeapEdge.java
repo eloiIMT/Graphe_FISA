@@ -3,7 +3,6 @@ package GraphAlgorithms;
 import java.util.ArrayList;
 import java.util.List;
 
-import Nodes_Edges.DirectedNode;
 import Nodes_Edges.Edge;
 import Nodes_Edges.UndirectedNode;
 
@@ -87,7 +86,7 @@ public class BinaryHeapEdge {
     private int getBestChildPos(int src) {
         int lastIndex = binh.size() - 1;
         if (isLeaf(src)) {
-            return Integer.MAX_VALUE;
+            return -1;
         } else {
             int left = 2 * src + 1;
             int right = 2 * src + 2;
@@ -100,17 +99,13 @@ public class BinaryHeapEdge {
     /**
 	 * Swap two edges in the binary heap
 	 * 
-	 * @param father an index of the list edges
-	 * @param child an index of the list edges
+	 * @param i an index of the list edges
+	 * @param j an index of the list edges
 	 */
-    private void swap(int father, int child) {         
-    	Edge temp = binh.get(father);
-    	binh.get(father).setFirstNode(binh.get(child).getFirstNode());
-    	binh.get(father).setSecondNode(binh.get(child).getSecondNode());
-    	binh.get(father).setWeight(binh.get(child).getWeight());
-    	binh.get(child).setFirstNode(temp.getFirstNode());
-    	binh.get(child).setSecondNode(temp.getSecondNode());
-    	binh.get(child).setWeight(temp.getWeight());
+    private void swap(int i, int j) {
+    	Edge temp = binh.get(i);
+    	binh.set(i, binh.get(j));
+    	binh.set(j, temp);
     }
 
     
@@ -193,6 +188,111 @@ public class BinaryHeapEdge {
         }
     }
 
+    // Implémentation de l'algorithme de Prim (exo 3, question 10)
+    public List<Edge> Prim(List<UndirectedNode> nodes, List<Edge> edges, UndirectedNode start) {
+        List<Edge> mst = new ArrayList<>();
+        List<UndirectedNode> visited = new ArrayList<>();
+        BinaryHeapEdge heap = new BinaryHeapEdge();
+
+        visited.add(start);
+
+        for (Edge e : edges) {
+            if (e.getFirstNode().equals(start) || e.getSecondNode().equals(start)) {
+                heap.insert((UndirectedNode) e.getFirstNode(), (UndirectedNode) e.getSecondNode(), e.getWeight());
+            }
+        }
+
+        while (mst.size() < nodes.size() - 1 && !heap.isEmpty()) {
+            Edge minEdge = heap.remove();
+            UndirectedNode u = (UndirectedNode) minEdge.getFirstNode();
+            UndirectedNode v = (UndirectedNode) minEdge.getSecondNode();
+
+            if (visited.contains(u) && visited.contains(v)) {
+                continue;
+            }
+
+            mst.add(minEdge);
+
+            UndirectedNode newNode = visited.contains(u) ? v : u;
+            visited.add(newNode);
+
+            for (Edge e : edges) {
+                UndirectedNode n1 = (UndirectedNode) e.getFirstNode();
+                UndirectedNode n2 = (UndirectedNode) e.getSecondNode();
+                if ((n1.equals(newNode) && !visited.contains(n2)) || (n2.equals(newNode) && !visited.contains(n1))) {
+                    heap.insert(n1, n2, e.getWeight());
+                }
+            }
+        }
+        return mst;
+    }
+
+    // Test Prim sur un graphe simple
+    public static void testPrimSimple() {
+        System.out.println("\n--- Test Prim sur un graphe simple ---");
+        List<UndirectedNode> nodes = new ArrayList<>();
+        for (int i = 0; i < 4; i++) nodes.add(new UndirectedNode(i));
+        List<Edge> edges = new ArrayList<>();
+        edges.add(new Edge(nodes.get(0), nodes.get(1), 1));
+        edges.add(new Edge(nodes.get(0), nodes.get(2), 4));
+        edges.add(new Edge(nodes.get(1), nodes.get(2), 2));
+        edges.add(new Edge(nodes.get(1), nodes.get(3), 5));
+        edges.add(new Edge(nodes.get(2), nodes.get(3), 3));
+        BinaryHeapEdge bhe = new BinaryHeapEdge();
+        List<Edge> mst = bhe.Prim(nodes, edges, nodes.get(0));
+        System.out.println("Arbre couvrant de poids minimal (Prim):");
+        int total = 0;
+        for (Edge e : mst) {
+            System.out.println(e);
+            total += e.getWeight();
+        }
+        System.out.println("Poids total attendu: 6");
+        System.out.println("Poids total obtenu: " + total);
+        System.out.println("\nArêtes attendues (ordre quelconque):");
+        System.out.println("(n_0,n_1,1)\n(n_1,n_2,2)\n(n_2,n_3,3)");
+    }
+
+    // Test Prim sur un graphe plus complexe
+    public static void testPrimComplexe() {
+        System.out.println("\n--- Test Prim sur un graphe plus complexe ---");
+        List<UndirectedNode> nodes = new ArrayList<>();
+        for (int i = 0; i < 6; i++) nodes.add(new UndirectedNode(i));
+        List<Edge> edges = new ArrayList<>();
+        edges.add(new Edge(nodes.get(0), nodes.get(1), 4));
+        edges.add(new Edge(nodes.get(0), nodes.get(2), 4));
+        edges.add(new Edge(nodes.get(1), nodes.get(2), 2));
+        edges.add(new Edge(nodes.get(2), nodes.get(3), 3));
+        edges.add(new Edge(nodes.get(2), nodes.get(4), 6));
+        edges.add(new Edge(nodes.get(2), nodes.get(5), 8));
+        edges.add(new Edge(nodes.get(3), nodes.get(4), 3));
+        edges.add(new Edge(nodes.get(4), nodes.get(5), 9));
+
+        BinaryHeapEdge bhe = new BinaryHeapEdge();
+        List<Edge> mst = bhe.Prim(nodes, edges, nodes.get(0));
+        System.out.println("Arbre couvrant de poids minimal (Prim):");
+        int total = 0;
+        for (Edge e : mst) {
+            System.out.println(e);
+            total += e.getWeight();
+        }
+        System.out.println("Poids total attendu: 20");
+        System.out.println("Poids total obtenu: " + total);
+    }
+
+    // Test du tas binaire d'arêtes
+    public static void testHeapRemove() {
+        BinaryHeapEdge jarjarBin = new BinaryHeapEdge();
+        System.out.println("\n--- Test remove sur le tas binaire d'arêtes ---");
+        for (int k = 10; k > 0; k--) {
+            int rand = 10 + k; // valeur fixe pour test stable
+            jarjarBin.insert(new UndirectedNode(k), new UndirectedNode(k+30), rand);
+        }
+        System.out.println("Tas avant suppression: " + jarjarBin);
+        while (!jarjarBin.isEmpty()) {
+            System.out.println("Remove: " + jarjarBin.remove());
+        }
+    }
+
     public static void main(String[] args) {
         BinaryHeapEdge jarjarBin = new BinaryHeapEdge();
         System.out.println(jarjarBin.isEmpty()+"\n");
@@ -206,8 +306,13 @@ public class BinaryHeapEdge {
             k--;
         }
         // A completer
-        System.out.println(jarjarBin);
-        System.out.println(jarjarBin.test());
+        System.out.println("Tas généré aléatoirement : " + jarjarBin);
+        System.out.println("Le tas est valide: " + jarjarBin.test());
+
+        // Lancement des tests
+        testHeapRemove();
+        testPrimSimple();
+        testPrimComplexe();
     }
 
 }
