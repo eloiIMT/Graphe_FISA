@@ -57,18 +57,19 @@ public class AdjacencyListDirectedGraph {
             this.nodes.add(new DirectedNode(i));
         }
         
-        for (DirectedNode n1 : this.getNodes()) {
-            for (int j = 0; j < matrix[n1.getLabel()].length; j++) {
-            	DirectedNode n2 = this.getNodes().get(j);
-                if (matrix[n1.getLabel()][j] != 0) {
-                	Arc a = new Arc(n1,n2);
-                    n1.addArc(a);
-                    this.arcs.add(a);                    
-                    n2.addArc(a);
-                    this.nbArcs++;
+        for (int i = 0; i < this.nbNodes; i++) {
+            for (int j = 0; j < this.nbNodes; j++) {
+                if (matrix[i][j] != 0) {
+                    DirectedNode from = this.getNodes().get(i);
+                    DirectedNode to = this.getNodes().get(j);
+                	Arc a = new Arc(from, to, matrix[i][j]);
+                    this.arcs.add(a);
+                    from.getArcSucc().add(a);
+                    to.getArcPred().add(a);
                 }
             }
         }
+        this.nbArcs = this.arcs.size();
     }
 
     public AdjacencyListDirectedGraph(AdjacencyListDirectedGraph g) {
