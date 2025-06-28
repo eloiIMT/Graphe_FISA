@@ -293,6 +293,17 @@ public class BinaryHeapEdge {
         }
     }
 
+    public static void testInsertionsBinaryHeap() {
+        BinaryHeap heap = new BinaryHeap();
+        System.out.println("Insertions: 4, 10, 8, 6, 3");
+        heap.insert(4);
+        heap.insert(10);
+        heap.insert(8);
+        heap.insert(6);
+        heap.insert(3);
+        System.out.println("Tas après insertions: " + heap);
+    }
+
     public static void main(String[] args) {
         BinaryHeapEdge jarjarBin = new BinaryHeapEdge();
         System.out.println(jarjarBin.isEmpty()+"\n");
@@ -305,7 +316,6 @@ public class BinaryHeapEdge {
             jarjarBin.insert(new UndirectedNode(k), new UndirectedNode(k+30), rand);            
             k--;
         }
-        // A completer
         System.out.println("Tas généré aléatoirement : " + jarjarBin);
         System.out.println("Le tas est valide: " + jarjarBin.test());
 
@@ -313,6 +323,7 @@ public class BinaryHeapEdge {
         testHeapRemove();
         testPrimSimple();
         testPrimComplexe();
+        testInsertionsBinaryHeap();
     }
 
 }

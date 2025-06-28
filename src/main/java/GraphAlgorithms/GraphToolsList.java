@@ -10,6 +10,8 @@ import Collection.Pair;
 
 public class GraphToolsList  extends GraphTools {
 
+	private static int _DEBBUG =0;
+
 	private static int[] visite;
 	private static int[] debut;
 	private static int[] fin;
@@ -128,6 +130,8 @@ public class GraphToolsList  extends GraphTools {
 		int taille = g.getNodes().size();
 		visite = new int[taille];
 		Arrays.fill(visite, NON_VISITE);
+
+		List<List<DirectedNode>> cfc = new ArrayList<>();
 
 		List<DirectedNode> ordreInverse = new ArrayList<>(ordre);
 		Collections.reverse(ordreInverse);
@@ -291,45 +295,66 @@ public class GraphToolsList  extends GraphTools {
 	}
 
 	public static void main(String[] args) {
-		int[][] Matrix = GraphTools.generateGraphData(10, 20, true, true, false, 100);
-		GraphTools.afficherMatrix(Matrix);
-		AdjacencyListDirectedGraph al = new AdjacencyListDirectedGraph(Matrix);
-		System.out.println(al);
+		int[][] matrixTp2 = GraphTools.generateGraphData(10, 20, false, false, true, 202547);
+		GraphTools.afficherMatrix(matrixTp2);
+		AdjacencyListDirectedGraph tp2 = new AdjacencyListDirectedGraph(matrixTp2);
+		System.out.println(matrixTp2);
 
 		GraphToolsList gtl = new GraphToolsList();
+
+		// Test BFS
+		List<DirectedNode> bfsResult = gtl.BFS(tp2);
+		List<String> bfsExpected = Arrays.asList("n_0", "n_1", "n_5", "n_6", "n_9", "n_4", "n_2", "n_7", "n_3");
+		List<String> bfsActual = bfsResult.stream().map(DirectedNode::toString).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+
 		System.out.println("BFS on the graph: ");
-		for (DirectedNode n : gtl.BFS(al)) {
-			System.out.print(n+" ");
+		for (DirectedNode n : bfsResult) {
+			System.out.print(n + " ");
 		}
-		System.out.println("\nExpected: n_0 n_4 n_2 n_6 n_9 n_5 n_3 n_8 n_1");
+		System.out.println("\nExpected: " + String.join(" ", bfsExpected));
+		System.out.println("BFS correct: " + bfsActual.equals(bfsExpected));
+
+		// Test DFS
+		List<DirectedNode> dfsResult = gtl.explorerGraphe(tp2);
+		List<String> dfsExpected = Arrays.asList("n_0", "n_1", "n_6", "n_2", "n_7", "n_3", "n_4", "n_5", "n_9", "n_8");
+		List<String> dfsActual = dfsResult.stream().map(DirectedNode::toString).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
 
 		System.out.println("\nDFS on the graph: ");
-		for (DirectedNode n : gtl.explorerGraphe(al)) {
-			System.out.print(n+" ");
+		for (DirectedNode n : dfsResult) {
+			System.out.print(n + " ");
 		}
-		System.out.println("\nExpected: n_0 n_4 n_2 n_6 n_9 n_5 n_3 n_8 n_1");
-		for (int s : visite) {
-			System.out.print(s+" ");
-		}
-		System.out.println();
-		for (int s : debut) {
-			System.out.print(s+" ");
-		}
-		System.out.println();
-		for (int s : fin) {
-			System.out.print(s+" ");
-		}
+		System.out.println("\nExpected: " + String.join(" ", dfsExpected));
+		System.out.println("DFS correct: " + dfsActual.equals(dfsExpected));
 
+		// Test Composantes fortement connexes
+		List<List<DirectedNode>> cfcResult = gtl.getComposantesFortementConnexes(tp2);
 		System.out.println("\nComposantes fortement connexes :");
-		for (List<DirectedNode> comp : gtl.getComposantesFortementConnexes(al)) {
+		for (List<DirectedNode> comp : cfcResult) {
 			System.out.println(comp);
 		}
-		System.out.println("\nExpected: [n_2], [n_7], [n_1, n_0, n_4, n_6, n_9, n_5, n_3, n_8]");
+
+		List<List<String>> cfcExpected = Arrays.asList(
+				Arrays.asList("n_5","n_4","n_6","n_2","n_7","n_1","n_9","n_3"),
+				Arrays.asList("n_0"),
+				Arrays.asList("n_8")
+		);
+
+		List<List<String>> cfcActual = new ArrayList<>();
+		for (List<DirectedNode> comp : cfcResult) {
+			List<String> compStr = comp.stream().map(DirectedNode::toString).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+			cfcActual.add(compStr);
+		}
+
+		System.out.println("Expected: " + cfcExpected);
+		System.out.println("CFC correct: " + cfcActual.equals(cfcExpected));
+
+		int[][] matrixTp3 = GraphTools.generateGraphData(10, 20, true, true, false, 100);
+		AdjacencyListDirectedGraph tp3 = new AdjacencyListDirectedGraph(matrixTp3);
 
 		// Test Dijkstra
 		System.out.println("\nTest de Dijkstra depuis le noeud 0:");
-		DirectedNode sourceNode = al.getNodes().get(0);
-		HashMap<DirectedNode, Integer> distances = gtl.dijkstra(al, sourceNode);
+		DirectedNode sourceNode = tp3.getNodes().get(0);
+		HashMap<DirectedNode, Integer> distances = gtl.dijkstra(tp3, sourceNode);
 
 		List<DirectedNode> sortedNodes = new ArrayList<>(distances.keySet());
 		sortedNodes.sort(Comparator.comparingInt(AbstractNode::getLabel));
